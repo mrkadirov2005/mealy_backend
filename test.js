@@ -1,0 +1,1 @@
+console.log("admin/access_token".split("/"))

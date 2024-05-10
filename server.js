@@ -3,38 +3,57 @@ const app = express();
 const mongoose=require("mongoose")
 const cors=require("cors")
 const connectDB=require("./config/dbConn")
-const getAllMeals=require("./controllers/getItems")
+const bcrypt=require("bcrypt")
+const credentials = require('./middleware/credentials');
+const corsOptions = require('./config/corsOptions');
+const cookieParser=require("cookie-parser")
+const MealRoute=require("./routes/meals")
+const RegisterRoute=require('./routes/register')
+const AuthRoute=require("./routes/auth")
+const AdminRouter=require("./routes/admin")
+const path=require("path")
+
+
+
 // connect to mongodb
 connectDB()
+
 const PORT = 9000;
 
-const whitelist=[
-    'http://localhost:3000',
-    'https://mealyteam-6gd6fa1mv-mrkadirov2005s-projects.vercel.app']
-const corsOptions={
-    origin:(origin,callback)=>{
-        if(whitelist.indexOf(origin)!==-1 || !origin){
-            callback(null,true)
-        }else{
-            callback(new Error('Not allowed by CORS'))
-        }
-    },
-    optionsSuccessStatus:200
-}
+// Handle options credentials check - before CORS!
+// and fetch cookies credentials requirement
+app.use(credentials)
 
-app.use(cors(corsOptions))
+// Cross Origin Resource Sharing
+app.use(cors(corsOptions));
 // Define a route
-app.get('/', (req, res) => {
-    console.log("get request, main page")
-  res.send('Hello, world!');
-});
-app.get('/meals',async (req,res)=>{
-    let result= await getAllMeals()
-    res.json(result)
-    })
+
+// built-in middleware to handle urlencoded form data
+app.use(express.urlencoded({ extended: false }));
+
+// built-in middleware for json 
+app.use(express.json());
+
+//middleware for cookies
+app.use(cookieParser());
+
+//serve static files
+app.use('/', express.static(path.join(__dirname, '/public')));
+
+
+
+app.get('/',require("./routes/root"));
+app.post('/register',RegisterRoute)
+app.post('/auth',AuthRoute)
+app.get('/meals',MealRoute)
+app.get(/^\/meals\/\d+$/, MealRoute);
+app.get(/^\/admins\/[\w\d\W]+$/,AdminRouter)
+
+app.get("*",async (req,res)=>{
+    res.json({"got this":req.originalUrl})
+})
 
 // Start the server
-
 mongoose.connection.once('open',()=>{
     console.log("connected to DB");
     app.listen(PORT, () => console.log(`Server is running on http://localhost:${PORT}`));
