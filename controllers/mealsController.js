@@ -14,15 +14,29 @@ const handleGetMeals=async (req,res)=>{
 }
 
 const getSingleMeal=async (req,res)=>{
-  const {id,_id}=req.body
-  if(!id || !_id){
+  const {_id}=req.body
+  if( !_id){
     res.json("please provide whole data")
     return
   }
   try {
     // split out the id
-    const urlID=Number(req.originalUrl.split("/")[2])
-    const selectedMeal= await MealScheme.findOne({id:urlID,_id}).exec()
+    const urlID=req.originalUrl.split("/")[2]
+    let findOneData={
+      _id
+    }
+    const numbered=Number(urlID)
+    if(numbered){
+      findOneData.id=numbered
+    }else if (!numbered){
+      findOneData.producer=urlID
+
+    }else{
+      res.json("error occured")
+      return
+    }
+
+    const selectedMeal= await MealScheme.findOne(findOneData).exec()
     if(!selectedMeal){
       console.log(selectedMeal)
       res.json({"message":"not found meals"})

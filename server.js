@@ -46,7 +46,7 @@ app.get('/',require("./routes/root"));
 app.post('/register',RegisterRoute)
 app.post('/auth',AuthRoute)
 app.get('/meals',MealRoute)
-app.get(/^\/meals\/\d+$/, MealRoute);
+app.get(/^\/meals\/[\w\d\W]+$/, MealRoute);
 app.get(/^\/admins\/[\w\d\W]+$/,AdminRouter)
 
 app.get("*",async (req,res)=>{

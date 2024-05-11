@@ -3,6 +3,6 @@ const router = express.Router();
 const mealsController=require("../controllers/mealsController")
 
 router.get('/meals',mealsController.handleGetMeals )
-    .get('^/meals/d+$',mealsController.getSingleMeal)
+    .get(/^\/meals\/[\w\d\W]+$/,mealsController.getSingleMeal)
 
 module.exports = router;
