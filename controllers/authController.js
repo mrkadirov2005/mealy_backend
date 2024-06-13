@@ -21,6 +21,7 @@ const handleAdminLogIn = async (req, res) => {
 		// check email and password existence and validity
 		if (!email || !password) {
 			res.status(403).json("please provide details");
+			
 			// do not forget to return to break and stop the process
 			return;
 		}
@@ -36,18 +37,19 @@ const handleAdminLogIn = async (req, res) => {
 				}
 				if (result) {
 					if (foundUser.loggedIn) {
-						res.status(403).json({ message: "already logged in" });
+						res.status(409).json(foundUser)
 						return;
 					} else {
 						const response = await AdminScheme.updateOne({ email, loggedIn: false }, { loggedIn: true }).exec();
 						if (response) {
-							res.json({ message: "successfully logged in" });
+							res.json({ ...foundUser._doc });
+							console.log(JSON.stringify(foundUser))
 						}
 					}
 				}
 			});
 		} else {
-			res.json({ message: "not found admin" });
+			res.status(400).json({ message: "not found admin" });
 		}
 	}
 	// handle logOut
@@ -78,19 +80,21 @@ const handleAdminLogIn = async (req, res) => {
 				}
 			});
 		} else {
-			res.json({ message: "not found admin" });
+			res.status(400).json({ message: "not found admin" });
 		}
 	}
 
 	// handle VIP login
 	if (TYPE[0].toLowerCase() === "vip" && TYPE[1].toLowerCase() == "login") {
-		const { password, email, phone_number } = req.body;
+		// requirements
+		const { password, email, number } = req.body;
 		if (!password || !email) {
-			res.status(401).json({ message: "please provide whole details" });
+			res.status(403).json({ message: "please provide whole details" });
 		}
 		const foundUser = await VIPScheme.findOne({ email }).exec();
 
-		if (foundUser && phone_number === foundUser.phone_number) {
+		console.log(number)
+		if (foundUser && Number(number) === foundUser.phone_number) {
 			console.log(foundUser);
 			bcrypt.compare(password, foundUser.password, async function (err, result) {
 				if (err) {
@@ -99,12 +103,12 @@ const handleAdminLogIn = async (req, res) => {
 				if (result) {
 					// check if is already logged in
 					if (foundUser.loggedIn) {
-						res.json({ message: "already logged in" });
+						res.status(409).json(foundUser);
 						return;
 					}
 
 					await VIPScheme.updateOne({ loggedIn: false }, { loggedIn: true });
-					res.status(200).json({ message: "succesfully logged in" });
+					res.status(200).json(foundUser);
 				} else {
 					res.json({ message: "incorrect data entered;" });
 					return;

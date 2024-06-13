@@ -12,9 +12,8 @@ const RegisterRoute=require('./routes/register')
 const AuthRoute=require("./routes/auth")
 const AdminRouter=require("./routes/admin")
 const path=require("path")
-
-
-
+const Product_Router=require("./routes/product")
+const add_product_route=require("./routes/add_pr")
 // connect to mongodb
 connectDB()
 
@@ -46,11 +45,14 @@ app.get('/',require("./routes/root"));
 app.post('/register',RegisterRoute)
 app.post('/auth',AuthRoute)
 app.get('/meals',MealRoute)
+app.post('/products',Product_Router)
+app.post('/add_product',add_product_route)
 app.get(/^\/meals\/[\w\d\W]+$/, MealRoute);
 app.get(/^\/admins\/[\w\d\W]+$/,AdminRouter)
 
+
 app.get("*",async (req,res)=>{
-    res.json({"got this":req.originalUrl})
+    res.status(400).json({"got this":req.originalUrl})
 })
 
 // Start the server

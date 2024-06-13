@@ -1,5 +1,5 @@
 // Assuming you have already connected to your MongoDB database using Mongoose
-
+const MEALSCHEMA =require("../Schemas/Mealy")
 const mongoose = require('mongoose');
 const jwt=require("jsonwebtoken")
 const bcrypt=require("bcrypt")
@@ -63,7 +63,26 @@ async function getSingleAdmin(req,res){
   
 }
 
+const getAdminProducts= async (req,res)=>{
+  console.log("req for admin products")
+const {firstname}=req.body
+if(!firstname){
+  res.status(400).json({"message":"username not provided"})
+}
+
+if(firstname){
+const foundData=await MEALSCHEMA.find({producer:firstname})
+console.log("request for admin name: ",firstname)
+res.json(foundData)
+}
+
+
+}
+
+const addNewProduct=(req,res)=>{
+console.log("req for add new product")
+}
 
 
 
-module.exports={retrieveAdmins,getSingleAdmin}
+module.exports={retrieveAdmins,getSingleAdmin,getAdminProducts,addNewProduct}
